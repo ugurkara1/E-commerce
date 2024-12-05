@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ürün Ekleme</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .container {
+            max-width: 600px;
+            margin-top: 50px;
+        }
+        .form-label {
+            font-weight: bold;
+        }
+        .form-select, .form-control {
+            border-radius: 8px;
+        }
+        .form-section {
+            background-color: #f8f9fa;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .btn-add-product {
+            background-color: #ff7a00;
+            color: white;
+            font-weight: bold;
+        }
+        .btn-add-product:hover {
+            background-color: #e96b00;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Ürün Ekleme</h2>
+        <form id="productForm" enctype="multipart/form-data">
+            <div class="form-section">
+                <div class="form-group">
+                    <label>Ürün Adı:</label>
+                    <input type="text" id="name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Açıklama:</label>
+                    <input type="text" id="description" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Fiyat:</label>
+                    <input type="number" id="price" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Kategori Adı:</label>
+                    <select id="kategoriAdi" class="form-control" required>
+                        <option value="" disabled selected>Kategori Seçiniz</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Fotoğraf Yükle:</label>
+                    <input type="file" id="files" class="form-control" multiple required>
+                </div>
+                <button type="submit" class="btn btn-add-product">Ürün Ekle</button>
+            </div>
+        </form>
+        <h3 class="mt-5">Ürünler</h3>
+        <ul id="productList" class="list-group mt-3"></ul>
+    </div>
+
+    <script>
+        // Sayfa yüklendiğinde kategorileri al ve dropdown'a ekle
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch("http://localhost:8080/kategori/list")
+                .then(response => response.json())
+                .then(categories => {
+                    const kategoriSelect = document.getElementById("kategoriAdi");
+                    categories.forEach(category => {
+                        const option = document.createElement("option");
+                        option.value = category.name;
+                        option.text = category.name;
+                        kategoriSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error("Kategoriler yüklenemedi:", error));
+        });
+
+        // Ürün ekleme formu
+        document.getElementById('productForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const formData = new FormData();
+            formData.append('product', new Blob([JSON.stringify({
+                name: document.getElementById('name').value,
+                description: document.getElementById('description').value,
+                price: document.getElementById('price').value,
+                kategoriAdi: document.getElementById('kategoriAdi').value
+            })], { type: 'application/json' }));
+
+            const files = document.getElementById('files').files;
+            for (let i = 0; i < files.length; i++) {
+                formData.append('files', files[i]);
+            }
+
+            fetch('http://localhost:8080/api/products/add', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(product => {
+                const productList = document.getElementById('productList');
+                const li = document.createElement('li');
+                li.className = 'list-group-item';
+                li.innerHTML = `
+                    <strong>${product.name}</strong> - ${product.description} - ${product.price} TL - ${product.kategoriAdi}
+                    <br>
+                    ${product.photoUrls.map(url => `<img src="${url}" alt="Ürün Fotoğrafı" width="100">`).join(' ')}
+                `;
+                productList.appendChild(li);
+
+                document.getElementById('productForm').reset();
+            })
+            .catch(error => console.error('Ürün eklenemedi:', error));
+        });
+    </script>
+</body>
+</html>
