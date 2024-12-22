@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ödeme İşlemleri</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .payment-container {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 600px;
+            margin: 50px auto;
+        }
+
+        .payment-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .payment-option {
+            margin-bottom: 15px;
+        }
+
+        .payment-option label {
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .payment-option input {
+            margin-right: 10px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+        }
+
+        .btn-custom {
+            background-color: #ff7f00;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 5px;
+            width: 100%;
+        }
+
+        .btn-custom:hover {
+            background-color: #e76f00;
+        }
+    </style>
+</head>
+<body>
+    <div class="payment-container">
+        <div class="payment-title">Ödeme Seçeneği</div>
+        
+        <!-- Ödeme Seçenekleri -->
+        <form id="paymentForm">
+            <div class="payment-option">
+                <input type="radio" id="cardPayment" name="paymentMethod" value="card">
+                <label for="cardPayment">Kartla Ödeme</label>
+            </div>
+            <div class="payment-option">
+                <input type="radio" id="codPayment" name="paymentMethod" value="cod">
+                <label for="codPayment">Kapıda Ödeme</label>
+            </div>
+
+            <!-- Kartla Ödeme Formu -->
+            <div id="cardForm" style="display: none;">
+                <div class="form-group">
+                    <label for="kartNo">Kart Numarası</label>
+                    <input type="number" id="kartNo" name="kartNo" class="form-control" maxlength="16" required>
+                </div>
+                <div class="form-group">
+                    <label for="sifre">Şifre</label>
+                    <input type="password" id="sifre" name="sifre" class="form-control" maxlength="4" required>
+                </div>
+                <div class="form-group">
+                    <label for="cvv">CVV</label>
+                    <input type="text" id="cvv" name="cvv" class="form-control" maxlength="3" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-custom">Ödeme Yap</button>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        // Ödeme seçeneği seçildiğinde ilgili formu göster
+        document.querySelectorAll('input[name="paymentMethod"]').forEach(function (radio) {
+            radio.addEventListener('change', function () {
+                if (this.value === 'card') {
+                    document.getElementById("cardForm").style.display = "block"; // Kart formunu göster
+                } else {
+                    document.getElementById("cardForm").style.display = "none"; // Kart formunu gizle
+                }
+            });
+        });
+
+		// Form gönderimi
+		document.getElementById("paymentForm").addEventListener("submit", function (e) {
+		    e.preventDefault(); // Sayfa yenilenmesini engelle
+
+		    var selectedMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+		    if (selectedMethod === 'card') {
+		        var kartNo = document.getElementById("kartNo").value;
+		        var sifre = document.getElementById("sifre").value;
+		        var cvv = document.getElementById("cvv").value;
+
+		        // Kart bilgileri ile ödeme işlemi
+		        $.ajax({
+		            url: '/siparis/odeme/kart',
+		            type: 'POST',
+		            data: {
+		                kartNo: kartNo,
+		                sifre: sifre,
+		                cvv: cvv
+		            },
+		            success: function (response) {
+		                console.log("Kartla ödeme başarılı, yönlendiriliyor...");
+		                alert(response);  // Başarılı ödeme mesajı
+		                window.location.href = "/tamamlandi";  // Başarılı işlem sonrası yönlendirme
+		            },
+		            error: function (xhr, status, error) {
+		                console.error("Hata:", status, error);  // Hata mesajlarını console'da görmek için
+		                alert("Kartla ödeme sırasında bir hata oluştu.");
+		            }
+		        });
+		    } else {
+		        // Kapıda ödeme işlemi
+		        $.ajax({
+		            url: '/siparis/odeme/cod',
+		            type: 'POST',
+		            success: function (response) {
+		                console.log("Kapıda ödeme başarılı, yönlendiriliyor...");
+		                alert(response);  // Başarılı ödeme mesajı
+		                window.location.href = "/tamamlandi";  // Başarılı işlem sonrası yönlendirme
+		            },
+		            error: function (xhr, status, error) {
+		                console.error("Hata:", status, error);  // Hata mesajlarını console'da görmek için
+		                alert("Kapıda ödeme sırasında bir hata oluştu.");
+		            }
+		        });
+		    }
+		});
+
+		document.getElementById("completeOrder").addEventListener("click", function () {
+		    fetch('/sepet/tamamla', { method: 'POST' })
+		        .then(response => {
+		            if (!response.ok) {
+		                throw new Error("Sipariş tamamlama başarısız oldu. Hata: " + response.status);
+		            }
+		            return response.text();
+		        })
+		        .then(data => {
+		            alert(data); // Başarı mesajını göster
+		            // Sipariş tamamlandıktan sonra sepeti temizlemek veya başka bir işlem yapmak istiyorsanız buraya ekleyebilirsiniz.
+		            window.location.reload(); // Sayfayı yenileyerek güncel sepet durumunu göster
+		        })
+		        .catch(error => {
+		            console.error("Hata:", error);
+		            alert("Siparişi tamamlarken bir hata oluştu: " + error.message);
+		        });
+		});
+
+    </script>
+</body>
+</html>

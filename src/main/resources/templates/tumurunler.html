@@ -1,0 +1,120 @@
+	<!DOCTYPE html>
+	<html lang="tr">
+	<head>
+	    <meta charset="UTF-8">
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	    <title>Mağazam</title>
+	    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+	    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	    <style>
+	        .product-card {
+	            border: 1px solid #ddd;
+	            padding: 15px;
+	            margin-bottom: 20px;
+	            border-radius: 8px;
+	            background-color: #f9f9f9;
+	        }
+	        .product-actions button {
+	            margin-right: 10px;
+	        }
+	    </style>
+	</head>
+	<body>
+	    <div class="container mt-5">
+	        <h2>Mağazam</h2>
+	        <div id="productList"></div>
+	    </div>
+	
+	    <script>
+	        const apiUrl = "http://localhost:8080/api/products/urunler";
+	
+	        // Ürünleri yükle
+	        function loadProducts() {
+	            const hesapId = localStorage.getItem("hesapId");
+	
+	            // Giriş yapılmamışsa uyarı ver ve giriş sayfasına yönlendir
+	            if (!hesapId) {
+	                alert("Lütfen giriş yapın.");
+	                window.location.href = "/login.html"; // Giriş sayfasına yönlendirin
+	                return; // Ürün yükleme işlemini durdur
+	            }
+	
+	            $.ajax({
+	                url: `${apiUrl}?hesapId=${hesapId}`, // Hesap ID ile ürünleri getir
+	                type: 'GET',
+	                success: function(products) {
+	                    const productList = $("#productList");
+	                    productList.empty(); // Önce listeyi temizle
+	
+	                    if (products.length === 0) {
+	                        productList.html("<p>Hiç ürün bulunamadı.</p>");
+	                        return;
+	                    }
+	
+	                    products.forEach(function(product) {
+	                        const productCard = `
+	                            <div class="product-card">
+	                                <h5>${product.name}</h5>
+	                                <p>${product.description}</p>
+	                                <p><strong>Fiyat:</strong> ${product.price} TL</p>
+	                                <p><strong>Stok:</strong> ${product.stockadedi}</p>
+	                                <p><strong>Kategori:</strong> ${product.kategoriAdi}</p>
+	                                <div>
+	                                    ${product.photoUrls.map(url => `<img src="${url}" alt="Ürün Fotoğrafı" width="100">`).join(' ')}
+	                                </div>
+	                                <div class="product-actions">
+	                                    <button class="btn btn-primary btn-sm" onclick="editProduct('${product.id}')">Düzenle</button>
+	                                    <button class="btn btn-danger btn-sm" onclick="deleteProduct('${product.id}')">Sil</button>
+	                                </div>
+	                            </div>
+	                        `;
+	                        productList.append(productCard);
+	                    });
+	                },
+	                error: function(xhr, status, error) {
+	                    console.error("Ürünler yüklenirken bir hata oluştu:", error);
+	                    alert("Ürünler yüklenirken bir hata oluştu.");
+	                }
+	            });
+	        }
+	
+	        // Ürün silme
+	        function deleteProduct(productId) {
+	            if (confirm('Bu ürünü silmek istediğinizden emin misiniz?')) {
+	                fetch(`/api/products/sil/${productId}`, {
+	                    method: 'DELETE',
+	                    headers: {
+	                        'Content-Type': 'application/json',
+	                        'Authorization': 'Bearer ' + localStorage.getItem('token') // Token kontrolü
+	                    }
+	                })
+	                .then(response => {
+	                    if (!response.ok) {
+	                        throw new Error('Ürün silinirken bir hata oluştu.');
+	                    }
+	                    return response.text();
+	                })
+	                .then(message => {
+	                    alert(message);
+	                    // Silinen ürünü DOM'dan kaldır
+	                    $(`#productList .product-card:has(button[onclick="deleteProduct('${productId}')"])`).remove();
+	                })
+	                .catch(error => {
+	                    console.error('Silme işlemi sırasında bir hata oluştu:', error);
+	                    alert('Bir hata oluştu: ' + error.message);
+	                });
+	            }
+	        }
+	
+	        // Sayfa yüklendiğinde ürünleri getir
+	        $(document).ready(function() {
+	            loadProducts();
+	        });
+	
+	        // Ürün düzenleme
+	        function editProduct(productId) {
+	            alert(`Düzenleme ekranı açılacak (Ürün ID: ${productId})`);
+	        }
+	    </script>
+	</body>
+</html>

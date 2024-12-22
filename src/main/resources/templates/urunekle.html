@@ -45,6 +45,10 @@
                     <label>Açıklama:</label>
                     <input type="text" id="description" class="form-control" required>
                 </div>
+				<div class="form-group">
+				    <label>Stok Adedi:</label>
+					<input type="number" id="stock" class="form-control" required>
+				</div>
                 <div class="form-group">
                     <label>Fiyat:</label>
                     <input type="number" id="price" class="form-control" required>
@@ -83,43 +87,84 @@
                 .catch(error => console.error("Kategoriler yüklenemedi:", error));
         });
 
-        // Ürün ekleme formu
-        document.getElementById('productForm').addEventListener('submit', function(event) {
-            event.preventDefault();
+		document.getElementById('productForm').addEventListener('submit', function(event) {
+		    event.preventDefault();
 
-            const formData = new FormData();
-            formData.append('product', new Blob([JSON.stringify({
-                name: document.getElementById('name').value,
-                description: document.getElementById('description').value,
-                price: document.getElementById('price').value,
-                kategoriAdi: document.getElementById('kategoriAdi').value
-            })], { type: 'application/json' }));
+		    // Kullanıcı ID'sini al
+		    const hesapId = localStorage.getItem("hesapId");
+		    if (!hesapId) {
+		        alert("Lütfen giriş yapın.");
+		        window.location.href = "/login.html"; // Giriş sayfasına yönlendirin
+		        return;
+		    }
 
-            const files = document.getElementById('files').files;
-            for (let i = 0; i < files.length; i++) {
-                formData.append('files', files[i]);
-            }
+		    // Kategori kontrolü
+		    const kategoriAdi = document.getElementById('kategoriAdi').value;
+		    if (!kategoriAdi) {
+		        alert("Lütfen bir kategori seçin.");
+		        return;
+		    }
 
-            fetch('http://localhost:8080/api/products/add', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(product => {
-                const productList = document.getElementById('productList');
-                const li = document.createElement('li');
-                li.className = 'list-group-item';
-                li.innerHTML = `
-                    <strong>${product.name}</strong> - ${product.description} - ${product.price} TL - ${product.kategoriAdi}
-                    <br>
-                    ${product.photoUrls.map(url => `<img src="${url}" alt="Ürün Fotoğrafı" width="100">`).join(' ')}
-                `;
-                productList.appendChild(li);
+		    // Fotoğraf dosyası kontrolü
+		    const files = document.getElementById('files').files;
+		    if (files.length === 0) {
+		        alert("Lütfen en az bir fotoğraf yükleyin.");
+		        return;
+		    }
 
-                document.getElementById('productForm').reset();
-            })
-            .catch(error => console.error('Ürün eklenemedi:', error));
-        });
+		    // Form verilerini oluştur
+		    const formData = new FormData();
+		    formData.append('product', new Blob([JSON.stringify({
+		        name: document.getElementById('name').value,
+		        description: document.getElementById('description').value,
+		        price: document.getElementById('price').value,
+		        kategoriAdi: kategoriAdi,
+		        stock: document.getElementById('stock').value
+		    })], { type: 'application/json' }));
+
+		    for (let i = 0; i < files.length; i++) {
+		        formData.append('files', files[i]);
+		    }
+
+		    // Hesap ID'yi formData'ya ekle
+		    formData.append('hesapId', hesapId);
+
+		    // Ürün ekleme isteği gönder
+		    fetch('http://localhost:8080/api/products/add', {
+		        method: 'POST',
+		        body: formData,
+		        credentials: 'include' // Oturum bilgilerini gönder
+		    })
+		    .then(response => {
+		        if (!response.ok) {
+		            throw new Error('Ürün eklenemedi: ' + response.statusText);
+		        }
+		        return response.json();
+		    })
+		    .then(product => {
+		        // Listeye yeni ürün ekle
+		        const productList = document.getElementById('productList');
+		        const li = document.createElement('li');
+		        li.className = 'list-group-item';
+		        li.innerHTML = `
+		            <strong>${product.name}</strong> - ${product.description} - ${product.price} TL - ${product.kategoriAdi}
+		            <br>
+		            ${product.photoUrls.map(url => `<img src="${url}" alt="Ürün Fotoğrafı" width="100">`).join(' ')}
+		        `;
+		        productList.appendChild(li);
+
+		        // Form sıfırla
+		        document.getElementById('productForm').reset();
+		        alert("Ürün başarıyla eklendi!");
+		    })
+		    .catch(error => {
+		        console.error(error);
+		        alert("Ürün eklenirken bir hata oluştu: " + error.message);
+		    });
+		});
+
+
+
     </script>
 </body>
 </html>

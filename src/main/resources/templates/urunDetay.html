@@ -66,6 +66,7 @@
         .btn-custom:hover {
             background-color: #e76f00;
         }
+		
 
         @media (max-width: 768px) {
             .product-info h1 {
@@ -81,6 +82,72 @@
                 padding: 8px 10px;
             }
         }
+        .comments-section {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .comments-list {
+            margin-bottom: 20px;
+        }
+
+        .comment {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .comment h5 {
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .comment p {
+            font-size: 1rem;
+            color: #555;
+        }
+
+        .comment span {
+            font-size: 1rem;
+            color: #ff7f00;
+            font-weight: bold;
+        }
+		.star-rating {
+		    display: inline-block;
+		    font-size: 20px;
+		}
+
+		.star-rating input {
+		    display: none;
+		}
+
+		.star-rating label {
+		    color: #ccc;  /* Boş yıldızlar için gri renk */
+		    padding: 0 2px;
+		}
+		.star-rating label.filled {
+		    color: #ff7f00;  /* Dolu yıldızlar için turuncu renk */
+		}
+
+		.star-rating input:checked ~ label {
+		    color: #ff7f00;
+		}
+
+		.star-rating input:checked ~ label:hover,
+		.star-rating input:checked ~ label:hover ~ label {
+		    color: #ff7f00;
+		}
+
+		.star-rating label:hover,
+		.star-rating label:hover ~ label {
+		    color: #ff7f00;
+		}
+
+		
+		
     </style>
 </head>
 <body>
@@ -130,18 +197,138 @@
 
                     <!-- Add to Cart Button -->
                     <div class="mt-4">
-                        <form th:action="@{/sepet/ekle}" method="post">
-                            <input type="hidden" name="productId" th:value="${product.id}">
-                            <button type="submit" class="btn btn-custom btn-block">Sepete Ekle</button>
-                        </form>
+						<form th:action="@{/sepet/ekle}" method="post" id="urunform">
+						    <input type="hidden" name="productId" th:value="${product.id}">
+							<label for="adet">Adet:</label>
+							<input type="number" name="adet" id="adet" value="1" min="1" max="{{ product.stockadedi }}" required />
+
+						    <button type="submit" class="btn btn-custom btn-block">Sepete Ekle</button>
+						</form>
                     </div>
+					<!-- Go to Store Button -->
+					<div class="mt-4">
+						<a th:href="@{'/magaza?hesapId=' + ${product.hesapId}}" class="btn btn-primary">Mağazaya Git</a>
+
+					</div>
                 </div>
             </div>
+        </div>
+        <!-- Yorumlar ve Değerlendirmeler -->
+        <div class="comments-section mt-5">
+            <h3>Yorumlar ve Değerlendirmeler</h3>
+
+			<!-- Yorumları Listele -->
+			<div class="comments-list">
+			    <div th:each="comment : ${product.comments}">
+			        <div class="comment">
+			            <div class="d-flex justify-content-between">
+			                <h5 th:text="${comment.username}"></h5>
+			                <span>
+			                    <!-- Yıldızlar -->
+			                    <div class="star-rating">
+			                        <span th:each="i : ${#numbers.sequence(1, 5)}">
+			                            <label th:classappend="${i <= comment.puan} ? 'filled' : ''">&#9733;</label>
+			                        </span>
+			                    </div>
+			                </span>
+			            </div>
+			            <p th:text="${comment.comment}"></p>
+			        </div>
+			    </div>
+			</div>
+
+
+            <!-- Yorum Ekleme Formu -->
+			<!-- Yorum Ekleme Formu -->
+			<h4>Yorum Yap</h4>
+			<form th:action="@{/api/products/urunDetay/yorum/{productId}(productId=${product.id})}" method="post">
+			    <div class="form-group">
+			        <label for="username">Kullanıcı Adı:</label>
+			        <input type="text" id="username" name="username" class="form-control" required />
+			    </div>
+			    <div class="form-group">
+			        <label for="comment">Yorum:</label>
+			        <textarea id="comment" name="comment" class="form-control" required></textarea>
+			    </div>
+			    <div class="form-group">
+			        <label for="puan">Değerlendirme:</label>
+			        <!-- Yıldızlı Puanlama Sistemi -->
+			        <div class="star-rating">
+			            <input type="radio" id="star5" name="puan" value="5" />
+			            <label for="star5" class="star">&#9733;</label>
+			            <input type="radio" id="star4" name="puan" value="4" />
+			            <label for="star4" class="star">&#9733;</label>
+			            <input type="radio" id="star3" name="puan" value="3" />
+			            <label for="star3" class="star">&#9733;</label>
+			            <input type="radio" id="star2" name="puan" value="2" />
+			            <label for="star2" class="star">&#9733;</label>
+			            <input type="radio" id="star1" name="puan" value="1" />
+			            <label for="star1" class="star">&#9733;</label>
+			        </div>
+			    </div>
+			    <button type="submit" class="btn btn-custom">Yorum Gönder</button>
+			</form>
+
         </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+	<script>
+		$(document).ready(function() {
+		       $('#addToCartForm').on('submit', function(event) {
+		           event.preventDefault(); // Sayfa yenilenmesini engeller
+
+		           const form = $(this);
+		           const actionUrl = "/sepet/ekle";
+		           const formData = form.serialize();
+
+		           $.post(actionUrl, formData, function(response) {
+		               showToast(response); // Başarı mesajı
+		           }).fail(function() {
+		               showToast("Bir hata oluştu!"); // Hata mesajı
+		           });
+		       });
+
+		       // Toast bildirimini gösteren fonksiyon
+		       function showToast(message) {
+		           $('#toast .toast-body').text(message); // Gelen mesajı toast'ın içine ekle
+		           $('#toast').toast('show'); // Toast'ı göster
+		       }
+		   });
+
+        $(document).ready(function() {
+            $('form').on('submit', function(event) {
+                event.preventDefault(); // Sayfa yenilenmesini engeller
+                const form = $(this);
+                const actionUrl = form.attr('action');
+                const formData = form.serialize();
+
+                $.post(actionUrl, formData, function(response) {
+                    alert("Yorum başarıyla eklendi!"); // Başarı mesajı
+                    location.reload(); // Yorum eklendikten sonra sayfayı yenile
+                }).fail(function() {
+                    alert("Bir hata oluştu!"); // Hata mesajı
+                });
+            });
+        });
+		$(document).ready(function() {
+		    $('#urunform').on('submit', function(event) {
+		        event.preventDefault(); // Sayfa yenilenmesini engeller
+		        const form = $(this);
+		        const actionUrl = form.attr('action');
+		        const formData = form.serialize();
+
+		        $.post(actionUrl, formData, function(response) {
+		            alert("Ürün sepete eklendi!"); // Başarı mesajı
+		            location.reload(); // Yorum eklendikten sonra sayfayı yenile
+		        }).fail(function() {
+		            alert("Bir hata oluştu!"); // Hata mesajı
+		        });
+		    });
+		});
+	</script>
+
 </body>
 </html>

@@ -31,6 +31,15 @@ public class AnasayfaController {
         return "kategori"; // kategori.html dosyasına yönlendirme
     }
 
+    @GetMapping("/odeme")
+    public String Odeme() {
+        return "odeme"; // kategori.html dosyasına yönlendirme
+    }
+    @GetMapping("/anasayfa/sepet")
+    public String Sepet() {
+        return "sepet"; // sepet.html dosyasına yönlendirme
+    }
+
     @GetMapping("/uyeolmak")
     public String UyeOlmak() {
         return "uyeolmak"; // uyeolmak.html dosyasına yönlendirme
@@ -55,7 +64,10 @@ public class AnasayfaController {
     public String urunekleme() {
         return "urunekle";
     }
-
+    @GetMapping("/tumurunler")
+    public String tumUrun() {
+        return "tumurunler";
+    }
     @GetMapping("/maildogrulama")
     public String Mail() {
         return "maildogrulama";

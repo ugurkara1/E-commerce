@@ -1,9 +1,9 @@
 package com.example.repository;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
-
 import com.example.model.SepetContract;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
 
-public interface SepetRepository extends MongoRepository<SepetContract, String>{
-
+@Repository
+public interface SepetRepository extends MongoRepository<SepetContract, String> {
 }

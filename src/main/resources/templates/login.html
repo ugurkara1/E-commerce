@@ -6,89 +6,89 @@
     <title>Giriş Yap</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-		/* Genel Stil */
-		        body {
-		            background-color: #f3f3f3;
-		            font-family: Arial, sans-serif;
-		            display: flex;
-		            justify-content: center;
-		            align-items: center;
-		            height: 100vh;
-		            margin: 0;
-		        }
+        /* Genel Stil */
+        body {
+            background-color: #f3f3f3;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
 
-		        /* Giriş Ekranı Kartı */
-		        .login-card {
-		            width: 100%;
-		            max-width: 360px;
-		            padding: 40px;
-		            background-color: #fff;
-		            border-radius: 8px;
-		            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-		        }
+        /* Giriş Ekranı Kartı */
+        .login-card {
+            width: 100%;
+            max-width: 360px;
+            padding: 40px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+        }
 
-		        /* Logo Alanı */
-		        .logo {
-		            display: block;
-		            margin: 0 auto 20px;
-		            width: 150px;
-		        }
+        /* Logo Alanı */
+        .logo {
+            display: block;
+            margin: 0 auto 20px;
+            width: 150px;
+        }
 
-		        /* Başlık */
-		        .login-card h2 {
-		            text-align: center;
-		            color: #333;
-		            font-weight: bold;
-		            margin-bottom: 30px;
-		        }
+        /* Başlık */
+        .login-card h2 {
+            text-align: center;
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
 
-		        /* Input Alanları */
-		        .form-control {
-		            height: 45px;
-		            border-radius: 5px;
-		            border: 1px solid #ddd;
-		            width: 100%;
-		        }
+        /* Input Alanları */
+        .form-control {
+            height: 45px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            width: 100%;
+        }
 
-		        /* Şifre Görünürlüğü Butonu */
-		        .password-toggle {
-		            position: absolute;
-		            right: 15px;
-		            top: 50%;
-		            transform: translateY(-50%);
-		            cursor: pointer;
-		            color: #aaa;
-		        }
+        /* Şifre Görünürlüğü Butonu */
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #aaa;
+        }
 
-		        /* Giriş Yap Butonu */
-		        .btn-login {
-		            background-color: #ff6000;
-		            border: none;
-		            color: #fff;
-		            font-weight: bold;
-		            padding: 12px 0;
-		            border-radius: 5px;
-		            width: 100%;
-		            transition: background-color 0.3s ease;
-		        }
+        /* Giriş Yap Butonu */
+        .btn-login {
+            background-color: #ff6000;
+            border: none;
+            color: #fff;
+            font-weight: bold;
+            padding: 12px 0;
+            border-radius: 5px;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
 
-		        .btn-login:hover {
-		            background-color: #e65500;
-		        }
+        .btn-login:hover {
+            background-color: #e65500;
+        }
 
-		        /* Kayıt Ol Bağlantısı */
-		        .register-link {
-		            display: block;
-		            text-align: center;
-		            margin-top: 20px;
-		            color: #ff6000;
-		            text-decoration: none;
-		            font-weight: 500;
-		        }
+        /* Kayıt Ol Bağlantısı */
+        .register-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #ff6000;
+            text-decoration: none;
+            font-weight: 500;
+        }
 
-		        .register-link:hover {
-		            text-decoration: underline;
-		        }
+        .register-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -161,7 +161,8 @@
                 contentType: "application/json",
                 data: JSON.stringify(formData),
                 success: function(response) {
-                    alert(response);
+                    $("#error-message").hide(); // Hata mesajını gizle
+                    alert("Giriş başarılı"); // Giriş başarılı mesajı
                     // Anasayfaya yönlendir, ardından oturum kontrolünü güncelle
                     window.location.href = "/anasayfa";
                 },
@@ -187,4 +188,3 @@
     </script>
 </body>
 </html>
-

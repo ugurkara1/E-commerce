@@ -2,12 +2,14 @@ package com.example.service;
 
 import com.example.dto.ProductDTO;
 import com.example.model.ProductContract;
+import com.example.model.SepetContract;
 import com.example.repository.ProductRepository;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -28,12 +30,15 @@ public class ProductService {
         this.productRepository = productRepository;
     }
     //ürün eklemek için kod parçası
-    public ProductContract addProduct(ProductDTO productDTO, List<MultipartFile> files) {
+    public ProductContract addProduct(ProductDTO productDTO, List<MultipartFile> files,String hesapId) {
         ProductContract product = new ProductContract();
         product.setName(productDTO.getName());
         product.setDescription(productDTO.getDescription());
         product.setPrice(productDTO.getPrice());
         product.setKategoriAdi(productDTO.getKategoriAdi());
+        product.setStockadedi(productDTO.getStockadedi());
+        product.setHesapId(hesapId); // Satıcı ID'si set ediliyor
+
         //fotoğrafları yükler ve url leri ayarlar
         if (!files.isEmpty()) {
             List<String> photoUrls = files.stream() //listedeki her öğeyi sırasıyla işlemek için
@@ -77,9 +82,56 @@ public class ProductService {
                         urun.getName(),
                         urun.getDescription(),
                         urun.getPrice(),
-                        urun.getPhotoUrls()      // Fotoğraflar
+                        urun.getPhotoUrls(),     // Fotoğraflar
+                        urun.getStockadedi()
                 ))
                 .collect(Collectors.toList()); //çıkan sonuçları liste olarak toplar 
     }
+    public ProductContract sellProduct(String id, int quantity) {
+        ProductContract product = productRepository.findById(id).orElseThrow(() -> 
+            new RuntimeException("Ürün bulunamadı"));
+
+        if (product.getStockadedi() < quantity) {
+            throw new RuntimeException("Yeterli stok yok!");
+        }
+
+        product.setStockadedi(product.getStockadedi() - quantity); // Stok düşülüyor
+        return productRepository.save(product);
+    }
+    public List<ProductContract> findProductsBySeller(String hesapId) {
+        return productRepository.findByHesapId(hesapId)
+        		.stream() //veri üzerinde işlem yapmak için kullanılan API
+                .map(urun -> new ProductContract(  //map:veri akışında(stream) bulunan öğeyi bir dönüşümden geçirerek yeni bir öğe oluşturur.
+                        urun.getId(),            // Veritabanındaki ID
+                        urun.getName(),
+                        urun.getDescription(),
+                        urun.getPrice(),
+                        urun.getPhotoUrls(),     // Fotoğraflar
+                        urun.getStockadedi()
+                ))
+                .collect(Collectors.toList()); //çıkan sonuçları liste olarak toplar 
+    }
+    public void deleteProductById(String productId) {
+        if (!productRepository.existsById(productId)) {
+            throw new RuntimeException("Silinmek istenen ürün bulunamadı.");
+        }
+        productRepository.deleteById(productId);
+    }
+    public void addCommentToProduct(String productId, ProductContract.Comment comment) {
+        ProductContract product = getProductById(productId);
+        if (product != null) {
+            // Eğer comments null ise, boş bir liste oluşturulmalı
+            if (product.getComments() == null) {
+                product.setComments(new ArrayList<>());
+            }
+            
+            List<ProductContract.Comment> comments = product.getComments();
+            comments.add(comment); // Yeni yorumu listeye ekle
+            product.setComments(comments); // Listeyi tekrar set et
+            productRepository.save(product); // Güncellenen ürünü kaydet
+        }
+    }
+
+
 
 }

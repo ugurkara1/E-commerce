@@ -7,66 +7,74 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f5f5f5;
-        }
+		body {
+		    font-family: Arial, sans-serif;
+		    margin: 0;
+		    padding: 0;
+		    background-color: #f5f5f5;
+		}
 
-        .product-list {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            padding: 20px;
-        }
+		.product-list {
+		    display: flex;
+		    flex-wrap: wrap;
+		    justify-content: center;
+		    gap: 20px;
+		    padding: 20px;
+		}
 
-        .product {
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            width: 250px;
-            padding: 16px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
+		.product {
+		    background: #fff;
+		    border: 1px solid #ddd;
+		    border-radius: 8px;
+		    width: 250px; /* Sabit genişlik */
+		    height: 400px; /* Sabit yükseklik */
+		    padding: 16px;
+		    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		    text-align: center;
+		    display: flex;
+		    flex-direction: column;
+		    justify-content: space-between; /* İçeriği düzenler */
+		}
 
-        .carousel-inner img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-        }
+		.carousel-inner img {
+		    max-width: 100%;
+		    height: 200px; /* Sabit yükseklik */
+		    object-fit: cover; /* Görselleri düzgün yerleştirir */
+		    border-radius: 8px;
+		}
 
-        .product-title {
-            font-size: 18px;
-            color: #333;
-            margin: 0;
-            margin-bottom: 8px;
-        }
+		.product-title {
+		    font-size: 18px;
+		    color: #333;
+		    margin: 0;
+		    margin-bottom: 8px;
+		}
 
-        .product-description {
-            font-size: 14px;
-            color: #777;
-            margin-bottom: 12px;
-        }
+		.product-description {
+		    font-size: 14px;
+		    color: #777;
+		    margin-bottom: 12px;
+		    overflow: hidden; /* Taşan metinleri gizler */
+		    text-overflow: ellipsis; /* Uzun metinleri '...' ile gösterir */
+		    white-space: nowrap;
+		}
 
-        .product-price {
-            font-weight: bold;
-            color: #e74c3c;
-        }
+		.product-price {
+		    font-weight: bold;
+		    color: #e74c3c;
+		}
 
-        .product-category {
-            display: block;
-            font-size: 12px;
-            color: #555;
-        }
+		.product-category {
+		    display: block;
+		    font-size: 12px;
+		    color: #555;
+		}
 
-        .navbar-brand {
-            font-size: 26px;
-            font-weight: bold;
-            color: #ff9800 !important;
-        }
+		.navbar-brand {
+		    font-size: 26px;
+		    font-weight: bold;
+		    color: #ff9800 !important;
+		}
 
         /* NavBar Styling */
         .navbar-nav {
@@ -127,18 +135,31 @@
                 <li class="nav-item" id="uyeOlSection">
                     <a href="/uyeolmak" class="btn btn-light" id="uyeOl" role="button">Üye Ol</a>
                 </li>
-                <li class="nav-item" id="girisYapSection">
-                    <a href="/login" class="btn btn-light" id="girisYapLink" title="Giriş Yap">
-                        <i class="fa fa-user"></i> Giriş Yap
-                    </a>
-                </li>
-                <li class="nav-item" id="userSection" style="display: none;">
-                    <span class="navbar-text text-light" id="userEmail"></span>
-                    <a href="javascript:;" class="btn btn-danger ml-2" id="logoutButton">Çıkış Yap</a>
-                </li>
+				<!-- Giriş Yap butonu -->
+				<li class="nav-item" id="girisYapSection">
+				    <a href="/login" class="btn btn-light" id="girisYapLink" title="Giriş Yap">
+				        <i class="fa fa-user"></i> Giriş Yap
+				    </a>
+				</li>
+
+				<!-- Kullanıcı Dropdown -->
+				<li class="nav-item" id="userSection" style="display: none;">
+				    <div class="dropdown">
+				        <button class="btn btn-light dropdown-toggle" type="button" id="userDropdownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				            <span id="userFullName">Kullanıcı Adı</span>
+				        </button>
+				        <div class="dropdown-menu" aria-labelledby="userDropdownButton">
+				            <a class="dropdown-item" href="javascript:;" id="logoutButton">Çıkış Yap</a>
+							<a class="dropdown-item" href="javascript:;" id="siparislerim">Tüm Siparişlerim</a>
+							<a class="dropdown-item" href="javascript:;" id="hesapbilgi">Hesap Bilgilerim</a>
+
+
+				        </div>
+				    </div>
+				</li>
                 <li class="nav-item ml-2">
                     <div class="myBasketHolder">
-                        <a href="javascript:;" class="myBasket basket-icon custom-icon" title="Sepetim">
+                        <a href="/sepet" class="myBasket basket-icon custom-icon" title="Sepetim">
                             <i class="fa fa-shopping-cart" aria-hidden="true"></i>
                             <span class="basketTotalNum">0</span>
                         </a>
@@ -185,6 +206,52 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
+		$(document).ready(function () {
+		        // Kullanıcı oturum kontrolü ve UI güncelleme
+		        function loadUser() {
+		            $.ajax({
+		                url: '/auth/checkSession', // Kullanıcı bilgilerini kontrol eden API
+		                method: 'GET',
+		                success: function (response) {
+		                    const { authenticated, userName } = response;
+		                    if (authenticated) {
+		                        $('#userFullName').text(userName);
+		                        $('#girisYapSection').hide(); // Giriş Yap butonunu gizle
+		                        $('#uyeOlSection').hide();   // Üye Ol butonunu gizle
+		                        $('#userSection').show();    // Kullanıcı dropdown'ı göster
+		                    } else {
+		                        $('#girisYapSection').show(); // Giriş Yap butonunu göster
+		                        $('#uyeOlSection').show();   // Üye Ol butonunu göster
+		                        $('#userSection').hide();    // Kullanıcı dropdown'ı gizle
+		                    }
+		                },
+		                error: function () {
+		                    console.error('Kullanıcı bilgileri yüklenemedi.');
+		                    $('#girisYapSection').show(); // Hata durumunda giriş ekranı
+		                    $('#uyeOlSection').show();
+		                    $('#userSection').hide();
+		                }
+		            });
+		        }
+
+		        // Çıkış yapma işlemi
+		        $('#logoutButton').click(function () {
+		            $.ajax({
+		                url: '/auth/logout', // Çıkış API
+		                method: 'GET',
+		                success: function () {
+		                    window.location.reload(); // Sayfayı yenileyerek çıkışı tamamla
+		                },
+		                error: function () {
+		                    console.error('Çıkış yapılamadı.');
+		                }
+		            });
+		        });
+
+		        // Sayfa yüklendiğinde kullanıcıyı kontrol et
+		        loadUser();
+		    });
+
         $(document).ready(function () {
             // Kategori yükleme
             function loadCategories() {

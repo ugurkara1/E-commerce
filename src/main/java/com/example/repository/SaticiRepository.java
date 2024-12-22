@@ -22,4 +22,6 @@ public interface SaticiRepository extends MongoRepository<SaticiContract, String
     Optional<SaticiContract> findByEmail(String email);
     
    	Optional<SaticiContract> findByTelefon(String telefon);
+    Optional<SaticiContract> findByHesapId(String hesapId);
+
 }

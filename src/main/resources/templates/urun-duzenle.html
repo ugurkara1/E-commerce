@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ürün Düzenle</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .container {
+            max-width: 600px;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Ürün Düzenle</h2>
+        <form id="editProductForm">
+            <div class="form-group">
+                <label>Ürün Adı:</label>
+                <input type="text" id="name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Açıklama:</label>
+                <input type="text" id="description" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Fiyat:</label>
+                <input type="number" id="price" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Stok:</label>
+                <input type="number" id="stock" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Kaydet</button>
+        </form>
+    </div>
+
+    <script>
+        const productId = new URLSearchParams(window.location.search).get('id');
+
+        // Ürün bilgilerini doldur
+        fetch(`http://localhost:8080/api/products/${productId}`)
+            .then(response => response.json())
+            .then(product => {
+                document.getElementById("name").value = product.name;
+                document.getElementById("description").value = product.description;
+                document.getElementById("price").value = product.price;
+                document.getElementById("stock").value = product.stockadedi;
+            });
+
+        // Form gönderme
+        document.getElementById("editProductForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const updatedProduct = {
+                name: document.getElementById("name").value,
+                description: document.getElementById("description").value,
+                price: document.getElementById("price").value,
+                stockadedi: document.getElementById("stock").value
+            };
+
+            fetch(`http://localhost:8080/api/products/${productId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updatedProduct)
+            })
+            .then(response => response.json())
+            .then(() => alert("Ürün güncellendi!"))
+            .catch(error => console.error("Ürün güncellenemedi:", error));
+        });
+    </script>
+</body>
+</html>
+	

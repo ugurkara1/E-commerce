@@ -1,5 +1,6 @@
 package com.example.service;
 
+import com.example.model.MusteriContract;
 import com.example.model.SaticiContract;
 import com.example.repository.SaticiRepository;
 
@@ -60,5 +61,12 @@ public class SaticiService {
         // Kullanıcı mevcutsa ve BCrypt ile şifre doğrulaması başarılıysa true döndür
         return user.isPresent() && BCrypt.checkpw(sifre, user.get().getSifre());
     }
-
+    public Optional<SaticiContract> findByEmail(String email) {
+        return saticiRepository.findByEmail(email);
+    }
+    // Hesap ID'sine göre satıcıyı bulma
+    public Optional<SaticiContract> findByHesapId(String hesapId) {
+        return saticiRepository.findByHesapId(hesapId);
+    }
+    
 }

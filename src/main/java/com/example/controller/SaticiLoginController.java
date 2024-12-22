@@ -25,32 +25,38 @@ import jakarta.servlet.http.HttpSession;
 @Controller
 @RequestMapping("/saticiGirisPanel")
 public class SaticiLoginController {
-	
-	 @Autowired
-	    private SaticiService saticiService;
 
-	 @PostMapping("/saticiGirisPanel")
-	 public ResponseEntity<?> login(@RequestBody LoginDto loginRequest, HttpSession session) {
-	     String email = loginRequest.getEmail();
-	     String password = loginRequest.getPassword();
+    @Autowired
+    private SaticiService saticiService;
 
-	     boolean isAuthenticated = saticiService.kullaniciGirisKontrolu(email, password);
+    @PostMapping("/saticiGirisPanel")
+    public ResponseEntity<?> login(@RequestBody LoginDto loginRequest, HttpSession session) {
+        String email = loginRequest.getEmail();
+        String password = loginRequest.getPassword();
 
-	     if (isAuthenticated) {
-	         Optional<SaticiContract> satici = saticiService.getSaticiByEmail(email);
-	         if (satici.isPresent()) {
-	             String magazaAdi = satici.get().getMagazaAdi();
-	             session.setAttribute("userEmail", email);
-	             Map<String, String> response = new HashMap<>();
-	             response.put("message", "Giriş başarılı, yönlendiriliyor...");
-	             response.put("magazaAdi", magazaAdi);  // Mağaza adını ekliyoruz
-	             return ResponseEntity.ok(response);
-	         } else {
-	             return ResponseEntity.status(404).body("Satıcı bulunamadı.");
-	         }
-	     } else {
-	         return ResponseEntity.status(401).body("Giriş başarısız, lütfen bilgilerinizi kontrol edin.");
-	     	}
-	 }
+        boolean isAuthenticated = saticiService.kullaniciGirisKontrolu(email, password);
+
+        if (isAuthenticated) {
+            Optional<SaticiContract> user = saticiService.findByEmail(email);
+            if (user.isPresent()) {
+                SaticiContract satici = user.get();
+                // Oturumda kullanıcı bilgilerini saklama
+                session.setAttribute("userEmail", email);
+                session.setAttribute("magazaAdi", satici.getMagazaAdi());
+                session.setAttribute("hesapId", satici.getHesapId()); // Müşteri ID'si saklanıyor
+                // Konsolda kontrol için loglama
+            	System.out.println("Oturum Başlatıldı: Satıcı ID -> " + satici.getHesapId());
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "Giriş başarılı, yönlendiriliyor...");
+                response.put("magazaAdi", satici.getMagazaAdi());
+                response.put("hesapId", String.valueOf(satici.getHesapId()));  // Hesap ID'si eklenmeli
+
+
+                return ResponseEntity.ok(response);
+            }
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Giriş başarısız, lütfen bilgilerinizi kontrol edin.");
+    }
     
+
 }

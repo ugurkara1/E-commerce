@@ -12,5 +12,9 @@ import org.springframework.web.multipart.MultipartFile;
 	@Repository
 	public interface ProductRepository extends MongoRepository<ProductContract, String> {
 
-	    List<ProductContract> findByKategoriAdi(String kategoriAdi); //ürünlerin kategori adını listeler
+		List<ProductContract> findByKategoriAdi(String kategoriAdi);
+	    List<ProductContract> findByKategoriAdiAndStockGreaterThan(String kategoriAdi, int stock); // 'stockadedi' değil, 'stock' kullanılacak
+	    List<ProductContract> findByHesapId(String hesapId);
+
 	}
+	

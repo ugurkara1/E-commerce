@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sepetim</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .cart-container {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .cart-header {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .cart-item {
+            border-bottom: 1px solid #ddd;
+            padding: 15px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .cart-item img {
+            max-width: 80px;
+            height: auto;
+            border-radius: 5px;
+            margin-right: 15px;
+        }
+
+        .cart-item-info h5 {
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .cart-item-info p {
+            font-size: 0.9rem;
+            color: #666;
+            margin: 5px 0;
+        }
+		.toast {
+		    position: fixed;
+		    bottom: 20px;
+		    right: 20px;
+		    z-index: 1050;
+		}
+        .price {
+            font-size: 1.1rem;
+            color: #ff7f00;
+            font-weight: bold;
+        }
+
+        .remove-btn {
+            color: #d9534f;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .remove-btn:hover {
+            color: #c9302c;
+        }
+
+        .cart-summary {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .summary-total {
+            font-size: 1.2rem;
+            color: #ff7f00;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .checkout-btn {
+            background-color: #ff7f00;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+
+        .checkout-btn:hover {
+            background-color: #e76f00;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <!-- Cart Items -->
+            <div class="col-lg-8">
+                <div class="cart-container">
+                    <div class="cart-header">Sepetim</div>
+                    <div class="cart-item" th:each="item : ${cartItems}">
+                        <img th:src="${item.photoUrls[0]}" alt="Ürün Fotoğrafı">
+                        <div class="cart-item-info">
+                            <h5 th:text="${item.name}">Ürün Adı</h5>
+                            <p th:text="${item.description}">Ürün Açıklaması</p>
+                            <p class="price" th:text="${item.price} + ' TL'">100 TL</p>
+                        </div>
+						<span class="remove-btn" th:data-product-id="${item.id}" onclick="removeItem(this)">Kaldır</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cart Summary -->
+            <div class="col-lg-4">
+                <div class="cart-summary">
+                    <div class="summary-title">Sipariş Özeti</div>
+                    <p>Toplam Ürün: <span th:text="${cartItems.size()}">0</span></p>
+                    <p>Kargo Ücreti: <span>Ücretsiz</span></p>
+                    <div class="summary-total">
+                        Toplam Fiyat: <span th:text="${totalPrice} + ' TL'">0 TL</span>
+                    </div>
+					<button class="checkout-btn" id="checkoutBtn" onclick="goToPayment()">Siparişi Tamamla</button>
+                </div>
+            </div>
+			 
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+	<script>
+		function goToPayment() {
+		    window.location.href = "/odeme"; // Spring Boot'da tanımlı ödeme endpointine yönlendirme
+		}
+
+		function addToCart(productId) {
+		    $.ajax({
+		        url: '/sepet/ekle?productId=' + productId, // Ürün ekleme URL'si
+		        type: 'POST',
+		        success: function(response) {
+		            showToast(response); // Backend'den gelen başarı mesajını göster
+		            // Sepet içeriğini güncellemek için sayfayı yenileyebilirsiniz
+		            location.reload(); 
+		        },
+		        error: function(xhr, status, error) {
+		            alert("Bir hata oluştu!");
+		        }
+		    });
+		}
+
+		function removeItem(element) {
+		    var productId = $(element).data('product-id');  // data-product-id'yi okuma
+
+		    $.ajax({
+		        url: '/sepet/sil/' + productId,  // Sepetten kaldırma URL'si
+		        type: 'DELETE',
+		        success: function(response) {
+		            alert(response); // Başarı mesajını göster
+		            location.reload(); // Sepet güncellenir
+		        },
+		        error: function(xhr, status, error) {
+		            alert("Bir hata oluştu!");
+		        }
+		    });
+		}
+
+		// Toast bildirimini gösteren fonksiyon
+		function showToast(message) {
+		    $('#toast .toast-body').text(message); // Gelen mesajı toast'ın içine ekle
+		    $('#toast').toast({ delay: 3000 }).toast('show'); // Toast'ı göster, 3 saniye sonra kaybolacak
+		}
+
+
+	</script>
+</body>
+</html>

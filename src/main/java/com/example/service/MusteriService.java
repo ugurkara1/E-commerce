@@ -1,6 +1,7 @@
 package com.example.service;
 
 import com.example.model.MusteriContract;
+import com.example.model.SaticiContract;
 import com.example.repository.MusteriRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,5 +43,8 @@ public class MusteriService {
     // Hesap ID'sine göre müşteri silme
     public void deleteMusteri(String hesapId) {
         musteriRepository.deleteByHesapId(hesapId);
+    }
+    public Optional<MusteriContract> findByEmail(String email) {
+        return musteriRepository.findByEmail(email);
     }
 }
